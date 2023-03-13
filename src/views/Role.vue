@@ -35,7 +35,7 @@
       <el-table-column prop="description" label="描述"></el-table-column>
       <el-table-column label="操作" width="280" align="center">
         <template slot-scope="scope">
-          <el-button type="info" @click="selectMenu(scope.row.id)">分配菜单 <i class="el-icon-menu"></i>
+          <el-button type="info" @click="selectMenu(scope.row)">分配菜单 <i class="el-icon-menu"></i>
           </el-button>
           <el-button type="success" @click="handleEdit(scope.row)">编辑 <i class="el-icon-edit"></i></el-button>
           <el-popconfirm
@@ -126,7 +126,8 @@ export default {
       },
       expends: [],
       checks: [],
-      roleId: 0
+      roleId: 0,
+      roleFlag: ''
     }
   },
   // 请求分页查询数据
@@ -165,71 +166,85 @@ export default {
         if (res.code === '200') {
           this.$message.success("绑定成功")
           this.menuDialogVis = false
+          //操作管理员角色后需要重新登陆
+          if (this.roleFlag == 'ROLE_ADMIN') {
+            this.$store.commit("logout")
+          }
         } else {
           this.$message.error(res.msg)
         }
       })
     },
     handleAdd() {
-      this.dialogFormVisible = true
-      this.form = {}
+      this.dialogFormVisible = true;
+      this.form = {};
     },
     handleEdit(row) {
-      this.form = row
-      this.dialogFormVisible = true
+      this.form = row;
+      this.dialogFormVisible = true;
     },
     del(id) {
       this.request.delete("/role/delete" + id).then(res => {
         if (res) {
-          this.$message.success("删除成功")
-          this.load()
+          this.$message.success("删除成功");
+          this.load();
         } else {
-          this.$message.error("删除失败")
+          this.$message.error("删除失败");
         }
       })
     },
     handleSelectionChange(val) {
-      console.log(val)
-      this.multipleSelection = val
+      console.log(val);
+      this.multipleSelection = val;
     },
     delBatch() {
       let ids = this.multipleSelection.map(v => v.id)  // [{}, {}, {}] => [1,2,3]
       this.request.post("/role/del/batch", ids).then(res => {
         if (res) {
-          this.$message.success("批量删除成功")
-          this.load()
+          this.$message.success("批量删除成功");
+          this.load();
         } else {
-          this.$message.error("批量删除失败")
+          this.$message.error("批量删除失败");
         }
       })
     },
     reset() {
-      this.name = ""
-      this.load()
+      this.name = "";
+      this.load();
     },
     // 动态分页请求
     handleSizeChange(pageSize) {
-      console.log(pageSize)
-      this.pageSize = pageSize
-      this.load()
+      console.log(pageSize);
+      this.pageSize = pageSize;
+      this.load();
     },
     handleCurrentChange(pageNum) {
-      console.log(pageNum)
-      this.pageNum = pageNum
-      this.load()
+      console.log(pageNum);
+      this.pageNum = pageNum;
+      this.load();
     },
-    selectMenu(roleId) {
+    selectMenu(role) {
       this.menuDialogVis = true;
-      this.roleId = roleId;
+      this.roleId = role.id;
+      this.roleFlag = role.flag;
       // 请求菜单数据
       this.request.get("/menu", {}).then(res => {
         console.log(res);
         this.menuData = res.data;
         // 把后台返回的菜单数据处理成id数组
-        this.expends = this.menuData.map(v => v.id)
+        this.expends = this.menuData.map(v => v.id);
       })
       this.request.get("/role/roleMenu/" + this.roleId).then(res => {
         this.checks = res.data;
+        this.request.get("/menu/ids").then(r => {
+          const ids = r.data;
+          ids.forEach(id => {
+            if (!this.checks.includes(id)) {
+              this.$refs.tree.setChecked(id, false);
+            }
+          })
+          this.menuDialogVis = true;
+        })
       })
     },
   }

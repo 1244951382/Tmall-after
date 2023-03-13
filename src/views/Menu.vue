@@ -11,7 +11,7 @@
 
     <!--      表格外部操作部分          -->
     <div style="margin: 10px 0">
-      <el-button type="primary" @click="handleAdd">新增 <i class="el-icon-circle-plus-outline"></i></el-button>
+      <el-button type="primary" @click="handleAdd(null)">新增 <i class="el-icon-circle-plus-outline"></i></el-button>
       <el-popconfirm
           class="ml-5"
           confirm-button-text='确定'
@@ -26,12 +26,19 @@
     </div>
 
     <!--        表格内部操作部分        -->
-    <el-table :data="tableData" border stripe :header-cell-class-name="'headerBg'" row-key="id" default-expand-all
-              @selection-change="handleSelectionChange">
+    <el-table :data="tableData"
+              border
+              stripe
+              :header-cell-class-name="'headerBg'"
+              row-key="id"
+              default-expand-all
+              :tree-props="{children: 'children',hasChildren: 'hasChildren'}">
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="id" label="ID" width="80"></el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
       <el-table-column prop="path" label="路径"></el-table-column>
+      <el-table-column prop="pagePath" label="页面路径"></el-table-column>
       <el-table-column prop="icon" label="图标" class-name="fontSize18" align="center"
                        label-class-name="fontSize12">
         <template slot-scope="scope">
@@ -41,6 +48,7 @@
       <el-table-column prop="description" label="描述"></el-table-column>
       <el-table-column label="操作" width="300" align="center">
         <template slot-scope="scope">
+          <!--  菜单没有父级菜单以及没有path路径时视为一级菜单  -->
           <el-button type="primary" @click="handleAdd(scope.row.id)" v-if="!scope.row.pid && !scope.row.path">新增子菜单
             <i class="el-icon-plus"></i>
           </el-button>
@@ -81,6 +89,9 @@
         <el-form-item label="路径">
           <el-input v-model="form.path" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="页面路径">
+          <el-input v-model="form.pagePath" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="图标">
           <el-select clearable v-model="form.icon" placeholder="请选择" style="width: 100%">
             <el-option v-for="item in options" :key="item.name" :Label="item.name" :value="item.value">
@@ -103,7 +114,7 @@
 <!--页面数据与动作Js代码-->
 <script>
 export default {
-  name: "Role",
+  name: "Menu",
   data() {
     return {
       tableData: [],
@@ -120,6 +131,7 @@ export default {
   // 请求分页查询数据
   created() {
     this.load()
+    this.findMenus()
   },
   methods: {
     // 将数据库查询操作封装
@@ -131,10 +143,9 @@ export default {
           name: this.name,
         }
       }).then(res => {
-        console.log(res)
-        this.tableData = res.records
+        // console.log(res)
+        // this.tableData = res.records
         this.total = res.total
-
       })
     },
     save() {
@@ -143,23 +154,32 @@ export default {
           this.$message.success("保存成功")
           this.dialogFormVisible = false
           this.load()
+          this.findMenus()
         } else {
           this.$message.error("保存失败")
         }
       })
     },
-    handleAdd() {
+    findMenus() {
+      this.request.get("/menu").then(res => {
+        this.tableData = res.data
+      })
+    },
+    handleAdd(pid) {
       this.dialogFormVisible = true
       this.form = {}
       if (pid) {
         this.form.pid = pid
       }
+      this.load()
+      this.findMenus()
     },
     handleEdit(row) {
       this.form = row
       this.dialogFormVisible = true
       //请求图标的数据
       this.request.get("/menu/icons").then(res => {
+        console.log(res)
         this.options = res.data
       })
     },
@@ -168,13 +188,14 @@ export default {
         if (res) {
           this.$message.success("删除成功")
           this.load()
+          this.findMenus()
         } else {
           this.$message.error("删除失败")
         }
       })
     },
     handleSelectionChange(val) {
-      console.log(val)
+      // console.log(val)
       this.multipleSelection = val
     },
     delBatch() {
@@ -183,6 +204,7 @@ export default {
         if (res) {
           this.$message.success("批量删除成功")
           this.load()
+          this.findMenus()
         } else {
           this.$message.error("批量删除失败")
         }
@@ -191,17 +213,20 @@ export default {
     reset() {
       this.name = ""
       this.load()
+      this.findMenus()
     },
     // 动态分页请求
     handleSizeChange(pageSize) {
-      console.log(pageSize)
+      // console.log(pageSize)
       this.pageSize = pageSize
       this.load()
+      this.findMenus()
     },
     handleCurrentChange(pageNum) {
-      console.log(pageNum)
+      // console.log(pageNum)
       this.pageNum = pageNum
       this.load()
+      this.findMenus()
     },
     exp() {
       window.open("http://localhost:9001/menu/export")
@@ -209,6 +234,7 @@ export default {
     handleExcelImportSuccess() {
       this.$message.success("文件导入成功!")
       this.load()
+      this.findMenus()
     }
   }
 }

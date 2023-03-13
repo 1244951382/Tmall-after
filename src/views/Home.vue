@@ -76,12 +76,11 @@ export default {
       yAxis: {
         type: 'value'
       },
-      series: [
-        {
-          name: "星巴克",
-          data: [],
-          type: 'bar'
-        },
+      series: [{
+        name: "星巴克",
+        data: [],
+        type: 'bar'
+      },
         {
           name: "星巴克",
           data: [],
@@ -126,58 +125,81 @@ export default {
         orient: 'vertical',
         left: 'left'
       },
-      series: [
-        {
-          name: '星巴克',
-          type: 'pie',
-          radius: '35%',
-          center: ['25%', '50%'],
-          label: {            //饼图图形上的文本标签
-            normal: {
-              show: true,
-              position: 'inner', //标签的位置
-              textStyle: {
-                fontWeight: 300,
-                fontSize: 14,    //文字的字体大小
-                color: "#fff"
-              },
-              formatter: '{d}%'
-            }
-          },
-          data: [],  // 填空
+      series: [{
+        name: '星巴克',
+        type: 'pie',
+        radius: '35%',
+        center: ['25%', '50%'],
+        label: { //饼图图形上的文本标签
+          normal: {
+            show: true,
+            position: 'inner', //标签的位置
+            textStyle: {
+              fontWeight: 300,
+              fontSize: 14, //文字的字体大小
+              color: "#fff"
+            },
+            formatter: '{d}%'
+          }
         },
+        data: [], // 填空
+      },
         {
           name: '瑞幸咖啡',
           type: 'pie',
           radius: '45%',
           center: ['75%', '60%'],
-          label: {            //饼图图形上的文本标签
+          label: { //饼图图形上的文本标签
             normal: {
               show: true,
               position: 'inner', //标签的位置
               textStyle: {
                 fontWeight: 300,
-                fontSize: 14,    //文字的字体大小
+                fontSize: 14, //文字的字体大小
                 color: "#fff"
               },
               formatter: '{c}({d}%)'
             }
           },
-          data: [{name: "第一季度", value: 5},
-            {name: "第二季度", value: 6},
-            {name: "第三季度", value: 7},
-            {name: "第四季度", value: 8},],  // 填空
+          data: [{
+            name: "第一季度",
+            value: 5
+          },
+            {
+              name: "第二季度",
+              value: 6
+            },
+            {
+              name: "第三季度",
+              value: 7
+            },
+            {
+              name: "第四季度",
+              value: 8
+            },
+          ], // 填空
         }
       ]
     };
     var pieDom = document.getElementById('pie');
     var pieChart = echarts.init(pieDom);
     this.request.get("/echarts/members").then(res => {
-      pieOption.series[0].data = [
-        {name: "第一季度", value: res.data[0]},
-        {name: "第二季度", value: res.data[1]},
-        {name: "第三季度", value: res.data[2]},
-        {name: "第四季度", value: res.data[3]},
+      pieOption.series[0].data = [{
+        name: "第一季度",
+        value: res.data[0]
+      },
+        {
+          name: "第二季度",
+          value: res.data[1]
+        },
+        {
+          name: "第三季度",
+          value: res.data[2]
+        },
+        {
+          name: "第四季度",
+          value: res.data[3]
+        },
       ]
       pieChart.setOption(pieOption)
     })

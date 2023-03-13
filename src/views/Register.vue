@@ -19,7 +19,7 @@
                     v-model="user.confirmPassword"></el-input>
         </el-form-item>
         <el-form-item style="margin: 10px 0; text-align: right">
-          <el-button type="primary" size="small" autocomplete="off" @click="login">注册</el-button>
+          <el-button type="primary" size="small" autocomplete="off" @click="register">注册</el-button>
           <el-button type="warning" size="small" autocomplete="off" @click="$router.push('/login')">返回登陆</el-button>
         </el-form-item>
       </el-form>
@@ -29,7 +29,7 @@
 
 <script>
 export default {
-  name: "Login",
+  name: "Register",
   data() {
     return {
       user: {},
@@ -50,7 +50,7 @@ export default {
     }
   },
   methods: {
-    login() {
+    register() {
       this.$refs['userForm'].validate((valid) => {
         if (valid) {  // 表单校验合法
           if (this.user.password !== this.user.confirmPassword) {
